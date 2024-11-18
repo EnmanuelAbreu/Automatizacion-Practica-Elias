@@ -49,6 +49,6 @@ jobs:
       - name: Configurar la URL base para Cypress
         run: echo "CYPRESS_BASE_URL=http://localhost:3000" >> $GITHUB_ENV
 
-      # Paso 7: Ejecutar pruebas con Cypress (excluyendo spec.cy.js)
-      - name: Ejecutar pruebas de Cypress (sin spec.cy.js)
+      # Paso 7: Ejecutar pruebas con Cypress 
+      - name: Ejecutar pruebas de Cypress 
         run: npx cypress run --spec "cypress/e2e/**/*.cy.js,!cypress/e2e/spec.cy.js"
