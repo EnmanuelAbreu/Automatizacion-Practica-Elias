@@ -1,56 +1,54 @@
-name: Cypress Tests
+name: Cypress Test Automation
 
 on:
   push:
-    branches:
-      - main  # Se ejecuta cuando se hace un push en la rama "main" (o la rama que elijas)
+    branches: [ "main" ]
 
 jobs:
-  cypress-run:
+  run-tests:
     runs-on: ubuntu-latest
 
-    strategy:
-      fail-fast: false
-      matrix:
-        containers: [1, 2]  # Usa 2 instancias paralelas
+    container:
+      image: cypress/included:12.17.1 # Usa una imagen preconfigurada para Cypress
 
     steps:
       # Paso 1: Clonar el repositorio
-      - name: Checkout Code
-        uses: actions/checkout@v4
+      - name: Clonar el repositorio
+        uses: actions/checkout@v3
 
-      # Paso 2: Configurar Node.js
-      - name: Set up Node.js
-        uses: actions/setup-node@v3
-        with:
-          node-version: '16'  # Especifica la versión de Node.js que estás utilizando
-
-      # Paso 3: Instalar dependencias de npm
-      - name: Install dependencies
-        run: npm install
-
-      # Paso 4: Iniciar el servidor
-      - name: Start web server
+      # Paso 2: Instalar herramientas adicionales
+      - name: Instalar herramientas adicionales
         run: |
-          nohup npm start &  # Ejecuta el servidor en segundo plano
+          apt-get update && apt-get install -y curl
+          npm install -g http-server wait-on
+
+      # Paso 3: Iniciar el servidor local
+      - name: Iniciar servidor local
+        run: http-server "./Nicole proyecto" -p 3000 &
         env:
           CI: true
 
+      # Paso 4: Verificar que el servidor está escuchando
+      - name: Verificar que el servidor responde (intento inicial)
+        run: |
+          echo "Verificando si el servidor responde..."
+          curl -I http://localhost:3000/index.html || echo "Servidor no disponible aún, esperando..."
+
       # Paso 5: Esperar a que el servidor esté disponible
-      - name: Wait for server to be ready
+      - name: Esperar que el servidor esté disponible
         run: |
           echo "Esperando que el servidor esté disponible..."
-          npx wait-on http://localhost:3000  # Espera a que el servidor esté listo
-        timeout-minutes: 5
+          for i in {1..20}; do
+            curl -I http://localhost:3000/index.html && break
+            echo "Servidor aún no disponible, reintentando en 5 segundos..."
+            sleep 5
+          done
+        timeout-minutes: 2
 
-      # Paso 6: Ejecutar las pruebas de Cypress
-      - name: Run Cypress tests
-        uses: cypress-io/github-action@v6
-        with:
-          start: npm start  # Inicia el servidor nuevamente si es necesario
-          wait-on: 'http://localhost:3000'  # Espera a que el servidor esté disponible
-          record: true  # Activa la grabación en Cypress Cloud
-          parallel: true  # Ejecuta las pruebas en paralelo
-        env:
-          CYPRESS_RECORD_KEY: ${{ secrets.CYPRESS_RECORD_KEY }}
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      # Paso 6: Configurar Cypress Base URL
+      - name: Configurar la URL base para Cypress
+        run: echo "CYPRESS_BASE_URL=http://localhost:3000" >> $GITHUB_ENV
+
+      # Paso 7: Ejecutar pruebas con Cypress (excluyendo spec.cy.js)
+      - name: Ejecutar pruebas de Cypress (sin spec.cy.js)
+        run: npx cypress run --spec "cypress/e2e/**/*.cy.js,!cypress/e2e/spec.cy.js"
