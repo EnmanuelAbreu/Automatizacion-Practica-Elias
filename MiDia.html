@@ -1,0 +1,45 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>To do List</title>
+    <link rel="stylesheet" href="Seccion1.css">
+</head>
+<body>
+    <header>
+        <nav class="navbar">
+            <div class="logo">CheckMate</div>
+            <ul class="nav-links">
+                <li><a href="Menu2.html">Inicio</a></li>
+                <li><a href="MiDia.html" target="_self">Mi Día</a></li>
+                <li><a href="Planeados.html" target="_self">Planeados</a></li>
+                <li><a href="Importantes.html" target="_self">Importantes</a></li>
+            </ul>
+        </nav>
+    </header>
+
+    <div class="container">
+        <div class="todo-app">
+            <h2>Mi día <img src="img/mi dia.png" alt="icon"></h2>
+            <h2>Tareas: <span id="cantidad">0</span></h2>
+            <div class="row" >
+                <input type="text" name="texto" id="inputbox" placeholder="Agrega tu texto" >
+                <input type="date" name="tiempo" id="dateTimeInput"> 
+               <div class="btn">
+                <button onclick="addTask()" name="Agregar" type="submit">Agregar</button> 
+               </div>        
+            </div>
+           <ul id="list-container" class="logo"> 
+           </ul> 
+                    <div class="funciones">
+                        <a href="Menu2.html" download="lista de tareas" id="downloadList">
+                        </a>
+                    <button onclick="clearTasks()">Eliminar todas las tareas</button>
+                    </div> 
+        </div>
+    </div>
+     
+    <script src="Seccion1.1.js"></script>
+</body>
+</html>
